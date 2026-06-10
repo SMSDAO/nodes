@@ -2,21 +2,23 @@ import { useState, useEffect, useCallback } from 'react';
 import { Block, LogEvent, MetricPoint, K8sPod, Language } from './types';
 import SHA256 from 'crypto-js/sha256';
 
-const generateHash = (index: number, timestamp: string, action: string, previousHash: string): string => {
-  return SHA256(`${index}${timestamp}${action}${previousHash}`).toString();
+const generateHash = (index: number, timestamp: string, action: string, previousHash: string, network: string = 'ATOMIC Native'): string => {
+  return SHA256(`${index}${timestamp}${action}${previousHash}${network}`).toString();
 };
 
+const NETWORKS = ['ATOMIC Native', 'Ethereum Mainnet', 'Polygon PoS', 'Arbitrum One', 'Solana', 'Optimism'];
+
 const INITIAL_BLOCKS: Block[] = [
-  { index: 0, timestamp: new Date(Date.now() - 600000).toISOString(), action: 'Genesis Block - Swarm Init', hash: '', previousHash: '0000000000000000000000000000000000000000000000000000000000000000', status: 'verified' },
-  { index: 1, timestamp: new Date(Date.now() - 300000).toISOString(), action: 'session_created (react)', hash: '', previousHash: '', status: 'verified' },
-  { index: 2, timestamp: new Date(Date.now() - 150000).toISOString(), action: 'elite_audit_complete', hash: '', previousHash: '', status: 'verified' },
+  { index: 0, timestamp: new Date(Date.now() - 600000).toISOString(), action: 'Genesis Block - Swarm Init', hash: '', previousHash: '0000000000000000000000000000000000000000000000000000000000000000', status: 'verified', network: 'ATOMIC Native' },
+  { index: 1, timestamp: new Date(Date.now() - 300000).toISOString(), action: 'session_created (react)', hash: '', previousHash: '', status: 'verified', network: 'ATOMIC Native' },
+  { index: 2, timestamp: new Date(Date.now() - 150000).toISOString(), action: 'elite_audit_complete', hash: '', previousHash: '', status: 'verified', network: 'Polygon PoS' },
 ];
 
-INITIAL_BLOCKS[0].hash = generateHash(0, INITIAL_BLOCKS[0].timestamp, INITIAL_BLOCKS[0].action, INITIAL_BLOCKS[0].previousHash);
+INITIAL_BLOCKS[0].hash = generateHash(0, INITIAL_BLOCKS[0].timestamp, INITIAL_BLOCKS[0].action, INITIAL_BLOCKS[0].previousHash, INITIAL_BLOCKS[0].network);
 INITIAL_BLOCKS[1].previousHash = INITIAL_BLOCKS[0].hash;
-INITIAL_BLOCKS[1].hash = generateHash(1, INITIAL_BLOCKS[1].timestamp, INITIAL_BLOCKS[1].action, INITIAL_BLOCKS[1].previousHash);
+INITIAL_BLOCKS[1].hash = generateHash(1, INITIAL_BLOCKS[1].timestamp, INITIAL_BLOCKS[1].action, INITIAL_BLOCKS[1].previousHash, INITIAL_BLOCKS[1].network);
 INITIAL_BLOCKS[2].previousHash = INITIAL_BLOCKS[1].hash;
-INITIAL_BLOCKS[2].hash = generateHash(2, INITIAL_BLOCKS[2].timestamp, INITIAL_BLOCKS[2].action, INITIAL_BLOCKS[2].previousHash);
+INITIAL_BLOCKS[2].hash = generateHash(2, INITIAL_BLOCKS[2].timestamp, INITIAL_BLOCKS[2].action, INITIAL_BLOCKS[2].previousHash, INITIAL_BLOCKS[2].network);
 
 
 const INITIAL_METRICS: MetricPoint[] = Array.from({ length: 20 }, (_, i) => ({
@@ -90,13 +92,15 @@ export function useSimulation() {
             const last = prevBlocks[prevBlocks.length - 1];
             const timestamp = new Date().toISOString();
             const action = `k8s_heal_${newPods[idx].language.toLowerCase()}`;
+            const network = 'ATOMIC Native';
             const newBlock: Block = {
               index: last.index + 1,
               timestamp,
               action,
-              hash: generateHash(last.index + 1, timestamp, action, last.hash),
+              hash: generateHash(last.index + 1, timestamp, action, last.hash, network),
               previousHash: last.hash,
-              status: 'verified'
+              status: 'verified',
+              network
             };
             return [...prevBlocks, newBlock];
           });
@@ -149,21 +153,23 @@ export function useSimulation() {
           const last = prev[prev.length - 1];
           const actions = ['auto_remediate_rust', 'test_shift_python', 'ml_predict_go', 'fips_validate_node', 'remediate_ts_types', 'patch_react_hooks', 'secure_shell_script', 'yaml_ci_cd_auth', 'html_csp_enforce'];
           const action = actions[Math.floor(Math.random() * actions.length)];
+          const network = NETWORKS[Math.floor(Math.random() * NETWORKS.length)];
           const timestamp = new Date().toISOString();
           const newBlock: Block = {
             index: last.index + 1,
             timestamp,
             action,
-            hash: generateHash(last.index + 1, timestamp, action, last.hash),
+            hash: generateHash(last.index + 1, timestamp, action, last.hash, network),
             previousHash: last.hash,
-            status: 'verified'
+            status: 'verified',
+            network
           };
           
           setLogs(logPrev => [{
             id: Math.random().toString(36).substr(2, 9),
             timestamp: new Date().toISOString(),
             trigger: '@blockchainAudit',
-            message: `New block #${newBlock.index} mined & verified (${action})`,
+            message: `New block #${newBlock.index} mined & verified on ${network} (${action})`,
             type: 'success'
           }, ...logPrev].slice(0, 50));
 
@@ -179,7 +185,7 @@ export function useSimulation() {
     };
   }, []);
 
-  const addBlock = useCallback((action: string) => {
+  const addBlock = useCallback((action: string, network: string = 'ATOMIC Native', contractAddress?: string, contractPayload?: any) => {
     setBlocks(prev => {
       const last = prev[prev.length - 1];
       const timestamp = new Date().toISOString();
@@ -187,16 +193,19 @@ export function useSimulation() {
         index: last.index + 1,
         timestamp,
         action,
-        hash: generateHash(last.index + 1, timestamp, action, last.hash),
+        hash: generateHash(last.index + 1, timestamp, action, last.hash, network),
         previousHash: last.hash,
-        status: 'verified'
+        status: 'verified',
+        network,
+        contractAddress,
+        contractPayload
       };
       
       setLogs(logPrev => [{
         id: Math.random().toString(36).substr(2, 9),
         timestamp: new Date().toISOString(),
         trigger: '@blockchainAudit',
-        message: `New block #${newBlock.index} mined & verified (${action})`,
+        message: `New block #${newBlock.index} mined & verified on ${network} (${action})`,
         type: 'success'
       }, ...logPrev].slice(0, 50));
 
@@ -204,5 +213,15 @@ export function useSimulation() {
     });
   }, []);
 
-  return { blocks, metrics, logs, pods, simulatePodFailure, addBlock };
+  const deployContract = useCallback((network: string, contractName: string, payload: any) => {
+    const address = '0x' + Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    addBlock(`Deploy Smart Contract: ${contractName}`, network, address, payload);
+    return address;
+  }, [addBlock]);
+
+  const executeContract = useCallback((network: string, contractAddress: string, action: string, payload: any) => {
+    addBlock(`Execute dApp Agreement: ${action}`, network, contractAddress, payload);
+  }, [addBlock]);
+
+  return { blocks, metrics, logs, pods, simulatePodFailure, addBlock, deployContract, executeContract, NETWORKS };
 }

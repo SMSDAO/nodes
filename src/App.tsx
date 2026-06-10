@@ -13,10 +13,11 @@ import { RepairHistory } from './components/RepairHistory';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
-  const { blocks, metrics, logs, pods, simulatePodFailure, addBlock } = useSimulation();
+  const { blocks, metrics, logs, pods, simulatePodFailure, addBlock, deployContract, executeContract, NETWORKS } = useSimulation();
+  const [activeNetwork, setActiveNetwork] = useState(NETWORKS[0]);
 
   return (
-    <Layout currentView={currentView} setView={setCurrentView}>
+    <Layout currentView={currentView} setView={setCurrentView} activeNetwork={activeNetwork}>
       {currentView === 'dashboard' && (
         <Dashboard metrics={metrics} logs={logs} currentBlock={blocks[blocks.length - 1]} />
       )}
@@ -39,7 +40,14 @@ export default function App() {
         <ConfigExamples />
       )}
       {currentView === 'blockchain' && (
-        <BlockchainExplorer blocks={blocks} />
+        <BlockchainExplorer 
+          blocks={blocks} 
+          deployContract={deployContract} 
+          executeContract={executeContract} 
+          NETWORKS={NETWORKS} 
+          activeNetwork={activeNetwork}
+          setActiveNetwork={setActiveNetwork}
+        />
       )}
       {currentView === 'metrics' && (
         <div className="animate-in fade-in duration-500 flex flex-col items-center justify-center p-20 text-center glass-panel rounded-xl">

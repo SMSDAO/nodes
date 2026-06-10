@@ -5,6 +5,9 @@ export interface Block {
   hash: string;
   previousHash: string;
   status: 'verified' | 'pending';
+  network?: string;
+  contractAddress?: string;
+  contractPayload?: any;
 }
 
 export interface MetricPoint {

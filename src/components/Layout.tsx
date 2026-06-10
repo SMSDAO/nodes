@@ -6,14 +6,27 @@ interface LayoutProps {
   currentView: ViewState;
   setView: (v: ViewState) => void;
   children: React.ReactNode;
+  activeNetwork: string;
 }
 
-export function Layout({ currentView, setView, children }: LayoutProps) {
+export function Layout({ currentView, setView, children, activeNetwork }: LayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [githubConnected, setGithubConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletConnecting, setWalletConnecting] = useState(false);
+  const [networkLatency, setNetworkLatency] = useState(45);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNetworkLatency(prev => {
+        // fluctuate latency slowly
+        const change = Math.floor(Math.random() * 11) - 5;
+        return Math.max(12, Math.min(150, prev + change));
+      });
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [activeNetwork]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -184,10 +197,24 @@ export function Layout({ currentView, setView, children }: LayoutProps) {
             {navItems.find(i => i.id === currentView)?.label || currentView}
           </h2>
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-              <Activity size={14} className="text-blue-500" />
-              <span>Node.js TS Enterprise Status:</span>
-              <span className="text-emerald-400 font-bold">HEALTHY</span>
+            <div className="flex items-center gap-4 text-xs font-mono text-slate-400 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-lg shadow-inner">
+              <div className="flex items-center gap-2">
+                <Database size={14} className="text-purple-400" />
+                <span>Network: <span className="text-slate-200">{activeNetwork}</span></span>
+              </div>
+              <div className="w-px h-3 bg-slate-700"></div>
+              <div className="flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-emerald-400 font-bold">ONLINE</span>
+              </div>
+              <div className="w-px h-3 bg-slate-700"></div>
+              <div className="flex items-center gap-1">
+                <Activity size={14} className={networkLatency < 50 ? "text-emerald-400" : networkLatency < 100 ? "text-amber-400" : "text-red-400"} />
+                <span className={networkLatency < 50 ? "text-emerald-400" : networkLatency < 100 ? "text-amber-400" : "text-red-400"}>{networkLatency}ms</span>
+              </div>
             </div>
             <div className="h-6 w-px bg-slate-700 mt-0.5"></div>
             <button className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-3 py-1.5 rounded transition-colors flex gap-2 items-center">

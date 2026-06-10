@@ -17,16 +17,26 @@ async function startServer() {
 
   // API Routes
   app.get('/api/auth/url', (req, res) => {
+    // Determine redirect URI: use APP_URL environment variable if present. Handle trailing slash if necessary
+    const baseUrl = process.env.APP_URL || `http://${req.get('host')}`;
+    // Strip trailing slash if present on baseUrl
+    const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const redirectUri = `${normalizedBaseUrl}/auth/callback`;
+
     const params = new URLSearchParams({
       client_id: process.env.GITHUB_CLIENT_ID || '',
+      redirect_uri: redirectUri,
       scope: 'repo user',
     });
 
     res.json({ url: `https://github.com/login/oauth/authorize?${params.toString()}` });
   });
 
-  app.get('/auth/callback', async (req, res) => {
+  app.get(['/auth/callback', '/auth/callback/'], async (req, res) => {
     const { code } = req.query;
+    const baseUrl = process.env.APP_URL || `http://${req.get('host')}`;
+    const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const redirectUri = `${normalizedBaseUrl}/auth/callback`;
 
     try {
       const response = await fetch('https://github.com/login/oauth/access_token', {
@@ -39,6 +49,7 @@ async function startServer() {
           client_id: process.env.GITHUB_CLIENT_ID,
           client_secret: process.env.GITHUB_CLIENT_SECRET,
           code,
+          redirect_uri: redirectUri,
         })
       });
 
