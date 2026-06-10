@@ -1,0 +1,6 @@
+{
+  "name": "Atomic Swarm Gods Elite",
+  "description": "Enterprise Self-Healing CI/CD Dashboard & ATOMIC LEDGER Blockchain Explorer",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
