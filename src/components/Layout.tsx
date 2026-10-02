@@ -21,7 +21,8 @@ import {
   BookOpen,
   Zap,
   Rocket,
-  Workflow
+  Workflow,
+  Brain
 } from 'lucide-react';
 
 interface NavItem {
@@ -131,6 +132,7 @@ export function Layout({ currentView, setView, children, activeNetwork }: Layout
     {
       category: 'Telemetry & Documentation',
       items: [
+        { id: 'oraclememory', label: 'AI Oracle Memory', icon: Brain, badge: 'Insight' },
         { id: 'langintel', label: 'Universal Auto-Repair', icon: Zap, badge: 'Elite' },
         { id: 'history', label: 'Repair History', icon: History },
         { id: 'config', label: 'Multi-Lang Matrix', icon: FileCode2 },

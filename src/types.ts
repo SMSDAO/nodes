@@ -26,6 +26,7 @@ export interface MetricPoint {
   selfHealingRate: number;
   riskScore: number;
   testCoverage: number;
+  latency: number;
 }
 
 export interface LogEvent {
@@ -34,6 +35,16 @@ export interface LogEvent {
   trigger: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
+}
+
+export interface WorkflowAction {
+  id: string;
+  name: string;
+  trigger: string;
+  action: string;
+  status: 'Armed' | 'Monitoring' | 'Executing' | 'Completed';
+  lastRun?: string;
+  contractAddress?: string;
 }
 
 export type ViewState = 
@@ -49,6 +60,7 @@ export type ViewState =
   | 'config' 
   | 'langintel'
   | 'dappstudio'
+  | 'oraclememory'
   | 'planner' 
   | 'history' 
   | 'guide';

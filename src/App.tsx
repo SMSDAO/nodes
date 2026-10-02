@@ -17,13 +17,29 @@ import { WalletPortfolioAI } from './components/WalletPortfolioAI';
 import { EnterpriseUserGuide } from './components/EnterpriseUserGuide';
 import { LanguageIntelligenceModules } from './components/LanguageIntelligenceModules';
 import { SmartContractStudio } from './components/SmartContractStudio';
+import { AIOracleMemory } from './components/AIOracleMemory';
 import { AnimatePresence } from 'motion/react';
 import * as motion from 'motion/react-client';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
-  const { blocks, metrics, logs, pods, deployedContracts, simulatePodFailure, addBlock, deployContract, executeContract, NETWORKS } = useSimulation();
+  const { 
+    blocks, 
+    metrics, 
+    logs, 
+    pods, 
+    deployedContracts, 
+    workflows,
+    simulatePodFailure, 
+    addBlock, 
+    deployContract, 
+    executeContract, 
+    addWorkflow,
+    removeWorkflow,
+    updateContractStatus,
+    NETWORKS 
+  } = useSimulation();
   const [activeNetwork, setActiveNetwork] = useState(NETWORKS[0]);
 
   if (!isAuthenticated) {
@@ -64,7 +80,14 @@ export default function App() {
               NETWORKS={NETWORKS}
               activeNetwork={activeNetwork}
               deployedContracts={deployedContracts}
+              workflows={workflows}
+              addWorkflow={addWorkflow}
+              removeWorkflow={removeWorkflow}
+              updateContractStatus={updateContractStatus}
             />
+          )}
+          {currentView === 'oraclememory' && (
+            <AIOracleMemory blocks={blocks} logs={logs} metrics={metrics} />
           )}
           {currentView === 'wallet' && (
             <WalletPortfolioAI />

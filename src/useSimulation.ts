@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Block, LogEvent, MetricPoint, K8sPod } from './types';
+import { Block, LogEvent, MetricPoint, K8sPod, WorkflowAction } from './types';
 import SHA256 from 'crypto-js/sha256';
 
 /**
@@ -66,6 +66,7 @@ const INITIAL_METRICS: MetricPoint[] = Array.from({ length: 20 }, (_, i) => ({
   selfHealingRate: 88 + Math.random() * 11,
   riskScore: 12 + Math.random() * 14,
   testCoverage: 94 + Math.random() * 3,
+  latency: 150 + Math.random() * 450, // ms
 }));
 
 const INITIAL_PODS: K8sPod[] = [
@@ -106,7 +107,11 @@ export function useSimulation() {
   const [blocks, setBlocks] = useState<Block[]>(INITIAL_BLOCKS);
   const [metrics, setMetrics] = useState<MetricPoint[]>(INITIAL_METRICS);
   const [pods, setPods] = useState<K8sPod[]>(INITIAL_PODS);
-  const [deployedContracts, setDeployedContracts] = useState<{address: string, name: string, network: string, template: string}[]>([]);
+  const [workflows, setWorkflows] = useState<WorkflowAction[]>([
+    { id: 'wf-1', name: 'Escrow Auto-Release', trigger: '@selfHeal Success', action: 'Release Escrow', status: 'Armed' },
+    { id: 'wf-2', name: 'Quarantine Protocol', trigger: 'FIPS Violation', action: 'Quarantine Node', status: 'Monitoring' }
+  ]);
+  const [deployedContracts, setDeployedContracts] = useState<{address: string, name: string, network: string, template: string, status: 'Active' | 'Paused' | 'Terminated'}[]>([]);
   const [logs, setLogs] = useState<LogEvent[]>([
     { id: '1', timestamp: new Date().toISOString(), trigger: 'FIPS-140-2', message: 'NIST Cryptographic Engine initialized. SHA-256 CAVP verified.', type: 'success' },
     { id: '2', timestamp: new Date().toISOString(), trigger: 'SMART-CONTRACT', message: 'AtomicAccessControl.sol deployed at 0x8b3e...ab12. Event hooks active.', type: 'info' }
@@ -188,12 +193,13 @@ export function useSimulation() {
   useEffect(() => {
     const metricInterval = setInterval(() => {
       setMetrics(prev => {
-        const newPoint = {
+        const newPoint: MetricPoint = {
           time: new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' }),
           confidence: Math.min(99.99, 96 + Math.random() * 3.98),
           selfHealingRate: Math.min(100, 90 + Math.random() * 9),
           riskScore: Math.max(2, 10 + Math.random() * 12),
           testCoverage: Math.min(100, Math.max(92, prev[prev.length - 1].testCoverage + (Math.random() - 0.5) * 1.5)),
+          latency: Math.max(80, 120 + (Math.random() - 0.4) * 200),
         };
         return [...prev.slice(1), newPoint];
       });
@@ -300,13 +306,28 @@ export function useSimulation() {
   const deployContract = useCallback((network: string, contractName: string, payload: any) => {
     const address = '0x' + Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
     addBlock(`deploy_contract_${payload.language === 'WASM' ? 'wasm' : 'evm'}`, network, address, { name: contractName, ...payload });
-    setDeployedContracts(prev => [...prev, { address, name: contractName, network, template: payload.template || 'custom' }]);
+    setDeployedContracts(prev => [...prev, { address, name: contractName, network, template: payload.template || 'custom', status: 'Active' }]);
     return address;
+  }, [addBlock]);
+
+  const updateContractStatus = useCallback((address: string, status: 'Active' | 'Paused' | 'Terminated') => {
+    setDeployedContracts(prev => prev.map(c => c.address === address ? { ...c, status } : c));
+    addBlock(`contract_status_update (${status})`, 'ATOMIC Native', address, { newStatus: status });
   }, [addBlock]);
 
   const executeContract = useCallback((network: string, contractAddress: string, action: string, payload: any) => {
     addBlock(`execute_acl_${action.toLowerCase().replace(/ /g, '_')}`, network, contractAddress, payload);
   }, [addBlock]);
 
-  return { blocks, metrics, logs, pods, deployedContracts, simulatePodFailure, addBlock, deployContract, executeContract, NETWORKS };
+  const addWorkflow = useCallback((workflow: Omit<WorkflowAction, 'id'>) => {
+    const newWf: WorkflowAction = { ...workflow, id: `wf-${Math.random().toString(36).substr(2, 9)}` };
+    setWorkflows(prev => [...prev, newWf]);
+    return newWf.id;
+  }, []);
+
+  const removeWorkflow = useCallback((id: string) => {
+    setWorkflows(prev => prev.filter(w => w.id !== id));
+  }, []);
+
+  return { blocks, metrics, logs, pods, deployedContracts, workflows, simulatePodFailure, addBlock, deployContract, executeContract, addWorkflow, removeWorkflow, updateContractStatus, NETWORKS };
 }
