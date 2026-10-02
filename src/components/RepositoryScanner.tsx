@@ -102,17 +102,23 @@ export function RepositoryScanner({ addBlock }: { addBlock?: (action: string) =>
         
         if (lang === 'Python') {
           addLog(`Bootstrapping Python AST Parsers, PyTest framework, and Bandit security agents...`, 'info');
+          addLog(`Scanning requirements.txt for pinned version vulnerabilities...`, 'info');
+          addLog(`Analyzing AST nodes for unsafe deserialization (pickle/yaml) patterns...`, 'warning');
         } else if (lang === 'Node.js') {
           addLog(`Dynamically loaded specialized 'node.git' testing frameworks. Pre-warming Jest & Mocha runners...`, 'info');
         } else if (lang === 'TypeScript' || lang === 'React' || lang === 'JavaScript') {
           addLog(`Loading ESTree Parsers, Jest/Vitest frameworks, and ESLint core...`, 'info');
         } else if (lang === 'Go') {
           addLog(`Engaging Go AST tools, 'go test' framework, and staticcheck agents...`, 'info');
+          addLog(`Scanning for goroutine leaks and race conditions in concurrency models...`, 'warning');
+          addLog(`Verifying go.mod checksums against secure ATOMIC mirror...`, 'info');
         } else if (lang === 'Rust') {
           addLog(`Initializing rust-analyzer, Cargo test harness, and Clippy agents...`, 'info');
+          addLog(`Performing cargo-audit on transitive dependencies...`, 'warning');
+          addLog(`Validating borrow checker compliance in performance-critical modules...`, 'info');
         }
         
-        addLog(`Found ${Math.floor(Math.random() * 5) + 1} vulnerabilities & deprecated dependencies.`, 'warning');
+        addLog(`Found ${Math.floor(Math.random() * 5) + 2} vulnerabilities & architectural bottlenecks.`, 'warning');
         if (lang.includes('EVM')) {
            addLog(`Cross-chain EVM Bridge detected. Simulating re-entrancy attack vectors...`, 'warning');
         }
@@ -123,13 +129,13 @@ export function RepositoryScanner({ addBlock }: { addBlock?: (action: string) =>
           let repairMsg = 'Applied Chaos Model auto-remediation patches without merge conflicts.';
           let blockAction = 'auto_remediation';
           if (lang === 'Python') {
-            repairMsg = 'Updated requirements.txt, deployed AST parser fixes, and applied secure pickling patches via Pytest framework.';
+            repairMsg = 'Updated requirements.txt (CVE-2024-27351), refactored insecure pickle usage in data_loader.py using safe_load, and verified all 42 Pytests passing.';
             blockAction = 'python_secure_ast_patch';
           } else if (lang === 'Rust') {
-            repairMsg = 'Resolved Cargo.toml unsafer dependencies and borrow checker violations.';
+            repairMsg = 'Resolved Cargo.toml unsafer dependencies, patched 2 borrow checker violations in crypto_core.rs, and verified with FIPS-validated signature.';
             blockAction = 'rust_cargo_remediation';
           } else if (lang === 'Go') {
-            repairMsg = 'Updated go.mod packages and applied goroutine leak prevention limits.';
+            repairMsg = 'Updated go.mod packages, implemented context-aware cancellation for auth-service goroutines, and resolved 1 data race in network/listener.go.';
             blockAction = 'go_mod_goroutine_patch';
           } else if (lang === 'Node.js') {
             repairMsg = 'Applied npm audit fixes, upgraded socket.io dependencies, and verified node tests passing.';
@@ -218,10 +224,10 @@ export function RepositoryScanner({ addBlock }: { addBlock?: (action: string) =>
         {/* Left Column: Config & Input */}
         <div className="space-y-6 lg:col-span-1">
           {/* GitHub Auth Box */}
-          <div className="glass-panel p-6 rounded-xl border border-slate-700/50">
+          <div className="glass-card p-6 rounded-xl border border-slate-700/50">
             <div className="flex items-center gap-3 mb-4">
-              <Github className={githubConnected ? "text-emerald-400" : "text-slate-300"} size={24} />
-              <h3 className="font-display font-semibold text-lg">GitHub Identity</h3>
+              <Github className={`${githubConnected ? "text-emerald-400 glow-text-green" : "text-slate-300"} transition-colors`} size={24} />
+              <h3 className="font-display font-semibold text-lg drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">GitHub Identity</h3>
             </div>
             
             {!githubConnected ? (
@@ -232,39 +238,39 @@ export function RepositoryScanner({ addBlock }: { addBlock?: (action: string) =>
                 <button 
                   onClick={handleGithubConnect}
                   disabled={connecting}
-                  className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-white text-slate-900 font-medium py-2.5 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-center gap-2 glass-input hover:bg-slate-700/80 text-white font-medium py-2.5 rounded-lg transition-colors glow-border-blue"
                 >
-                  {connecting ? <Loader2 className="animate-spin" size={18} /> : <Github size={18} />}
+                  {connecting ? <Loader2 className="animate-spin text-blue-400" size={18} /> : <Github size={18} className="text-slate-300" />}
                   {connecting ? 'Connecting...' : 'Connect GitHub Provider'}
                 </button>
               </div>
             ) : (
-              <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-lg flex items-start gap-3">
-                <CheckCircle2 className="text-emerald-400 mt-0.5 shrink-0" size={18} />
+              <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-lg flex items-start gap-3 glow-border-green shadow-[inset_0_0_15px_rgba(16,185,129,0.15)]">
+                <CheckCircle2 className="text-emerald-400 mt-0.5 shrink-0 glow-text-green" size={18} />
                 <div>
-                  <div className="text-emerald-400 font-medium text-sm">Authenticated Successfully</div>
-                  <div className="text-slate-400 text-xs mt-1 font-mono">Scope: repo, workflow, write:pr</div>
+                  <div className="text-emerald-400 font-medium text-sm glow-text-green">Authenticated Successfully</div>
+                  <div className="text-emerald-200/50 text-xs mt-1 font-mono">Scope: repo, workflow, write:pr</div>
                 </div>
               </div>
             )}
           </div>
 
           {/* Target Repository Input */}
-          <div className={`glass-panel p-6 rounded-xl border transition-all duration-300 ${githubConnected ? 'border-blue-500/30' : 'border-slate-800 opacity-50 pointer-events-none'}`}>
-            <h3 className="font-display font-semibold mb-4 flex items-center gap-2">
+          <div className={`glass-card p-6 rounded-xl transition-all duration-300 ${githubConnected ? 'border-blue-500/50 glow-border-blue shadow-[0_0_20px_rgba(59,130,246,0.1)]' : 'border-slate-800 opacity-50 pointer-events-none'}`}>
+            <h3 className="font-display font-semibold mb-4 flex items-center gap-2 glow-text-blue">
               <Search className="text-blue-400" size={18} />
               Target Repository
             </h3>
             
             <div className="space-y-4">
               <div>
-                  <label className="text-xs font-mono text-slate-400 mb-1.5 block uppercase tracking-wider">Repository URL or Name</label>
+                  <label className="text-xs font-mono text-slate-400 mb-1.5 block uppercase tracking-wider glow-text-blue">Repository URL or Name</label>
                 <input 
                   type="text" 
                   value={repoUrl}
                   onChange={e => setRepoUrl(e.target.value)}
                   placeholder="e.g., https://github.com/SolanaRemix/socket-.git"
-                  className="w-full bg-slate-950 border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all font-mono"
+                  className="w-full glass-input rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-mono"
                   disabled={scanState !== 'idle'}
                 />
               </div>
@@ -272,12 +278,12 @@ export function RepositoryScanner({ addBlock }: { addBlock?: (action: string) =>
               <button 
                 onClick={startScan}
                 disabled={!repoUrl || scanState !== 'idle'}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-blue-600/20 hover:bg-blue-600/40 disabled:bg-slate-800 disabled:text-slate-500 text-blue-300 border border-blue-500/50 font-medium py-2.5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] glow-border-blue"
               >
                 {scanState === 'idle' ? (
                   <>Admit & Scan <ArrowRight size={16} /></>
                 ) : (
-                  <><Loader2 className="animate-spin" size={16} /> Processing Swarm Action...</>
+                  <><Loader2 className="animate-spin text-blue-400" size={16} /> Processing Swarm Action...</>
                 )}
               </button>
             </div>
@@ -286,10 +292,10 @@ export function RepositoryScanner({ addBlock }: { addBlock?: (action: string) =>
 
         {/* Right Column: Execution View */}
         <div className="lg:col-span-2 flex flex-col">
-          <div className="glass-panel p-1 rounded-xl border border-slate-700/50 flex flex-col h-full overflow-hidden">
+          <div className="glass-card p-1 rounded-xl flex flex-col h-full overflow-hidden">
             
             {/* Header progress tracker */}
-            <div className="flex bg-slate-900/50 border-b border-slate-800/50 p-4">
+            <div className="flex bg-slate-900/40 border-b border-slate-700/50 p-4 backdrop-blur-md">
                {[
                  { id: 'admitting', icon: Search, label: 'Admit/Clone' },
                  { id: 'scanning', icon: ShieldCheck, label: 'Deep Scan' },
@@ -299,26 +305,26 @@ export function RepositoryScanner({ addBlock }: { addBlock?: (action: string) =>
                  const isActive = scanState === step.id;
                  const isPast = ['admitting', 'scanning', 'repairing', 'pr_opened'].indexOf(scanState) > ['admitting', 'scanning', 'repairing', 'pr_opened'].indexOf(step.id) && scanState !== 'idle';
                  return (
-                   <div key={step.id} className={`flex-1 flex justify-center items-center flex-col gap-2 ${idx !== 3 ? 'border-r border-slate-800/50' : ''}`}>
+                   <div key={step.id} className={`flex-1 flex justify-center items-center flex-col gap-2 ${idx !== 3 ? 'border-r border-slate-700/30' : ''}`}>
                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                       isPast ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/50' : 
-                       isActive ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50 scale-110 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 
-                       'bg-slate-800 text-slate-500'
+                       isPast ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/80 glow-border-green shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 
+                       isActive ? 'bg-purple-500/20 text-purple-400 ring-1 ring-purple-500/80 scale-110 glow-border-purple shadow-[0_0_20px_rgba(168,85,247,0.5)]' : 
+                       'bg-slate-800/50 text-slate-500 border border-slate-700'
                      }`}>
-                       {isPast ? <CheckCircle2 size={16} /> : <step.icon size={16} className={isActive && step.id === 'repairing' ? 'animate-spin' : ''} />}
+                       {isPast ? <CheckCircle2 size={16} className="glow-text-green" /> : <step.icon size={16} className={isActive ? (step.id === 'repairing' ? 'animate-spin glow-text-purple' : 'glow-text-purple') : ''} />}
                      </div>
-                     <span className={`text-[10px] uppercase font-bold tracking-wider ${isActive ? 'text-blue-400' : isPast ? 'text-emerald-400' : 'text-slate-500'}`}>{step.label}</span>
+                     <span className={`text-[10px] uppercase font-bold tracking-wider ${isActive ? 'text-purple-400 glow-text-purple' : isPast ? 'text-emerald-400 glow-text-green' : 'text-slate-500'}`}>{step.label}</span>
                    </div>
                  );
                })}
             </div>
 
             {/* Execution Logs */}
-            <div className="flex-1 bg-slate-950 p-4 font-mono text-xs overflow-y-auto min-h-[300px]">
+            <div className="flex-1 bg-slate-950/40 p-4 font-mono text-xs overflow-y-auto min-h-[300px] shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
               {scanState === 'idle' ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-600">
-                   <ScanSearch size={48} className="mb-4 opacity-20" />
-                   <p>Awaiting repository admission payload.</p>
+                <div className="h-full flex flex-col items-center justify-center text-slate-500 glow-text-blue">
+                   <ScanSearch size={48} className="mb-4 opacity-30 text-blue-400" />
+                   <p className="drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">Awaiting repository admission payload.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -329,17 +335,17 @@ export function RepositoryScanner({ addBlock }: { addBlock?: (action: string) =>
                       animate={{ opacity: 1, x: 0 }}
                       className="flex gap-3"
                     >
-                      <span className="text-slate-600">[{log.time}]</span>
+                      <span className="text-slate-500">[{log.time}]</span>
                       <span className={
-                        log.type === 'success' ? 'text-emerald-400' :
-                        log.type === 'warning' ? 'text-amber-400' :
-                        'text-blue-400'
+                        log.type === 'success' ? 'text-emerald-400 glow-text-green' :
+                        log.type === 'warning' ? 'text-amber-400 glow-text-orange' :
+                        'text-blue-400 glow-text-blue'
                       }>{log.msg}</span>
                     </motion.div>
                   ))}
                   
                   {scanState !== 'pr_opened' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 text-slate-500 animate-pulse">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 text-slate-500 animate-pulse glow-text-purple">
                       <span>[{new Date().toLocaleTimeString()}]</span>
                       <span>_</span>
                     </motion.div>

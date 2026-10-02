@@ -155,25 +155,25 @@ export function CapacityPlanner() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
         <div>
           <h2 className="text-2xl font-display font-semibold flex items-center gap-3">
-            <Activity className="text-blue-500" />
-            Predictive Capacity Planner
+            <Activity className="text-blue-400 glow-text-blue" />
+            <span className="glow-text-blue">Predictive Capacity Planner</span>
           </h2>
-          <p className="text-slate-400 mt-2">D3.js visualization profiling future CPU and memory demand for Kubernetes clusters.</p>
+          <p className="text-slate-300 mt-2">D3.js visualization profiling future CPU and memory demand for Kubernetes clusters.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3 glass-panel p-6 rounded-xl border border-slate-700/50">
+        <div className="lg:col-span-3 glass-card p-6 rounded-xl border border-slate-700/50">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2 text-slate-300 font-semibold font-display">
-              <Server size={18} className="text-slate-400" /> K8s Resource Forecast (30 Days)
+            <div className="flex items-center gap-2 text-white font-semibold font-display drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+              <Server size={18} className="text-slate-300" /> K8s Resource Forecast (30 Days)
             </div>
             <div className="flex gap-4 text-xs font-mono">
               <div className="flex items-center gap-2">
-                 <span className="w-3 h-3 rounded-sm bg-blue-500"></span> CPU Demand (%)
+                 <span className="w-3 h-3 rounded-sm bg-blue-500 glow-border-blue shrink-0 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></span> <span className="glow-text-blue">CPU Demand (%)</span>
               </div>
               <div className="flex items-center gap-2">
-                 <span className="w-3 h-3 rounded-sm bg-purple-500"></span> Memory Demand (%)
+                 <span className="w-3 h-3 rounded-sm bg-purple-500 glow-border-purple shrink-0 shadow-[0_0_10px_rgba(168,85,247,0.5)]"></span> <span className="glow-text-purple">Memory Demand (%)</span>
               </div>
             </div>
           </div>
@@ -184,33 +184,33 @@ export function CapacityPlanner() {
               width={dimensions.width}
               height={dimensions.height}
               className="w-full h-full text-slate-200"
-              style={{ overflow: 'visible' }}
+              style={{ overflow: 'visible', filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' }}
             />
           </div>
         </div>
 
         <div className="lg:col-span-1 space-y-4">
-          <div className="glass-panel p-5 rounded-xl border border-slate-700/50">
-             <div className="flex items-center gap-3 mb-3 text-slate-300">
+          <div className="glass-card p-5 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:border-slate-500/50">
+             <div className="flex items-center gap-3 mb-3 text-slate-300 glow-text-blue">
                <Cpu className="text-blue-400" size={18} />
                <h3 className="font-semibold text-sm">Peak CPU Target</h3>
              </div>
-             <p className="text-3xl font-display font-bold text-white mb-1">82%</p>
-             <p className="text-xs text-slate-500">Expected in 14 days</p>
-             <div className="mt-4 pt-4 border-t border-slate-800/50">
-                <p className="text-xs text-blue-400 font-mono">Recommendation: Scale compute pods by +3 ahead of Day 12.</p>
+             <p className="text-3xl font-display font-bold text-white mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">82%</p>
+             <p className="text-xs text-slate-400">Expected in <span className="text-blue-300 glow-text-blue">14 days</span></p>
+             <div className="mt-4 pt-4 border-t border-slate-700/50">
+                <p className="text-xs text-blue-400 font-mono glow-text-blue">Recommendation: Scale compute pods by +3 ahead of Day 12.</p>
              </div>
           </div>
 
-          <div className="glass-panel p-5 rounded-xl border border-slate-700/50">
-             <div className="flex items-center gap-3 mb-3 text-slate-300">
+          <div className="glass-card p-5 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:border-slate-500/50">
+             <div className="flex items-center gap-3 mb-3 text-slate-300 glow-text-purple">
                <Database className="text-purple-400" size={18} />
                <h3 className="font-semibold text-sm">Memory Threshold</h3>
              </div>
-             <p className="text-3xl font-display font-bold text-white mb-1">94%</p>
-             <p className="text-xs text-slate-500">Expected in 28 days</p>
-             <div className="mt-4 pt-4 border-t border-slate-800/50">
-                <p className="text-xs text-purple-400 font-mono">Alert: Sustained OOM risk detected. Pre-provision nodes.</p>
+             <p className="text-3xl font-display font-bold text-white mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">94%</p>
+             <p className="text-xs text-slate-400">Expected in <span className="text-purple-300 glow-text-purple">28 days</span></p>
+             <div className="mt-4 pt-4 border-t border-slate-700/50">
+                <p className="text-xs text-purple-400 font-mono glow-text-purple">Alert: Sustained OOM risk detected. Pre-provision nodes.</p>
              </div>
           </div>
         </div>

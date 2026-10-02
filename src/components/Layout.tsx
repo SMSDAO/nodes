@@ -1,6 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState } from '../types';
-import { Hexagon, LayoutDashboard, Database, Activity, Github, Settings, Menu, Server, FileCode2, X, ScanSearch, CheckCircle2, Loader2, Wallet, History } from 'lucide-react';
+import { 
+  Hexagon, 
+  LayoutDashboard, 
+  Database, 
+  Activity, 
+  Github, 
+  Menu, 
+  Server, 
+  FileCode2, 
+  X, 
+  ScanSearch, 
+  CheckCircle2, 
+  Loader2, 
+  Wallet, 
+  History, 
+  ShieldCheck, 
+  Key, 
+  Coins, 
+  BookOpen,
+  Zap,
+  Rocket,
+  Workflow
+} from 'lucide-react';
+
+interface NavItem {
+  id: ViewState;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  badge?: string;
+  pulse?: boolean;
+}
+
+interface NavCategory {
+  category: string;
+  items: NavItem[];
+}
 
 interface LayoutProps {
   currentView: ViewState;
@@ -15,14 +50,13 @@ export function Layout({ currentView, setView, children, activeNetwork }: Layout
   const [connecting, setConnecting] = useState(false);
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletConnecting, setWalletConnecting] = useState(false);
-  const [networkLatency, setNetworkLatency] = useState(45);
+  const [networkLatency, setNetworkLatency] = useState(38);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setNetworkLatency(prev => {
-        // fluctuate latency slowly
         const change = Math.floor(Math.random() * 11) - 5;
-        return Math.max(12, Math.min(150, prev + change));
+        return Math.max(12, Math.min(120, prev + change));
       });
     }, 2500);
     return () => clearInterval(interval);
@@ -70,161 +104,213 @@ export function Layout({ currentView, setView, children, activeNetwork }: Layout
     setTimeout(() => {
       setWalletConnected(true);
       setWalletConnecting(false);
-    }, 1500);
+    }, 1200);
   };
 
-  const navItems = [
-    { id: 'dashboard', label: 'Surgery Dashboard', icon: LayoutDashboard },
-    { id: 'scanner', label: 'Repo Scanner', icon: ScanSearch },
-    { id: 'evmbridge', label: 'EVM Bridge Audit', icon: Wallet },
-    { id: 'kubernetes', label: 'K8s Operator', icon: Server },
-    { id: 'planner', label: 'Capacity Planner', icon: Activity },
-    { id: 'blockchain', label: 'ATOMIC LEDGER', icon: Database },
-    { id: 'history', label: 'Repair History', icon: History },
-    { id: 'metrics', label: 'ML Analytics', icon: Activity },
-    { id: 'config', label: 'Multi-Lang Config', icon: FileCode2 },
-  ] as const;
+  const navCategories: NavCategory[] = [
+    {
+      category: 'Core Operations',
+      items: [
+        { id: 'dashboard', label: 'Surgery Dashboard', icon: LayoutDashboard, badge: 'Live' },
+        { id: 'dappstudio', label: 'dApp & Automation Studio', icon: Rocket, badge: 'New' },
+        { id: 'fipscrypto', label: 'FIPS 140-2 Crypto', icon: ShieldCheck, badge: 'NIST Level 3' },
+        { id: 'smartcontracts', label: 'Smart Contract ACL', icon: Key, badge: 'Auto Bridge' },
+        { id: 'wallet', label: 'Web3 Wallet & AI', icon: Wallet, badge: 'HD Vault' },
+      ]
+    },
+    {
+      category: 'Consensus & Infrastructure',
+      items: [
+        { id: 'blockchain', label: 'ATOMIC LEDGER', icon: Database, pulse: true },
+        { id: 'scanner', label: 'Repo Scanner', icon: ScanSearch },
+        { id: 'evmbridge', label: 'EVM Bridge Audit', icon: Coins },
+        { id: 'kubernetes', label: 'K8s Operator Swarm', icon: Server },
+        { id: 'planner', label: 'Capacity Planner', icon: Activity },
+      ]
+    },
+    {
+      category: 'Telemetry & Documentation',
+      items: [
+        { id: 'langintel', label: 'Universal Auto-Repair', icon: Zap, badge: 'Elite' },
+        { id: 'history', label: 'Repair History', icon: History },
+        { id: 'config', label: 'Multi-Lang Matrix', icon: FileCode2 },
+        { id: 'guide', label: 'Enterprise User Guide', icon: BookOpen, badge: 'Docs' },
+      ]
+    }
+  ];
+
+  const allItems: NavItem[] = navCategories.flatMap(c => c.items);
+  const activeItem = allItems.find(i => i.id === currentView);
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#020617] text-slate-200">
+    <div className="h-[100dvh] flex flex-col md:flex-row bg-transparent text-slate-200 overflow-hidden relative font-sans">
       
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Backdrop */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/80 z-40 md:hidden backdrop-blur-lg transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
-      <aside className={`w-64 border-r border-slate-800 bg-slate-900/95 md:bg-slate-900/40 shrink-0 flex flex-col fixed md:relative z-50 h-full transition-transform duration-300 ease-in-out md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+      {/* Sidebar - Mobile Optimized with Touch Scroll */}
+      <aside className={`w-72 border-r border-slate-700/40 glass-panel shrink-0 flex flex-col fixed md:relative z-50 h-[100dvh] transition-transform duration-300 ease-in-out md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        
+        {/* Brand Header */}
+        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between shrink-0 bg-slate-950/40">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded relative overflow-hidden bg-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.5)]">
-              <Hexagon size={20} className="text-white relative z-10" />
+            <div className="w-9 h-9 rounded-xl relative overflow-hidden bg-purple-600/20 border border-purple-500/50 flex items-center justify-center glow-border-purple">
+              <Hexagon size={22} className="text-purple-300 relative z-10 glow-text-purple animate-pulse" />
             </div>
             <div>
-              <h1 className="font-display font-bold text-sm tracking-tight leading-tight">ATOMIC SWARM</h1>
-              <h2 className="font-mono text-[10px] text-blue-400 font-semibold tracking-widest">GODS ELITE v1.7.0</h2>
+              <h1 className="font-display font-bold text-sm tracking-tight leading-tight text-white glow-text-purple">ATOMIC SWARM</h1>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-[9px] text-blue-400 font-bold tracking-widest glow-text-blue">GODS ELITE v2.4</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 glow-border-green"></span>
+              </div>
             </div>
           </div>
           <button 
-            className="md:hidden text-slate-400 hover:text-white"
+            className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setView(item.id);
-                setIsMobileMenuOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                currentView === item.id 
-                  ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[inset_0_0_12px_rgba(37,99,235,0.1)]' 
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
-              }`}
-            >
-              <item.icon size={18} />
-              {item.label}
-              {item.id === 'blockchain' && (
-                <span className="ml-auto w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-              )}
-            </button>
+        {/* Scrollable Navigation - iPhone 13 Pro Max viewport scroll fix */}
+        <nav className="flex-1 p-3.5 space-y-4 overflow-y-auto ios-scroll-fix pb-16">
+          {navCategories.map((cat, cIdx) => (
+            <div key={cIdx} className="space-y-1">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold px-3 py-1">
+                {cat.category}
+              </div>
+              {cat.items.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setView(item.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 ${
+                    currentView === item.id 
+                      ? 'glass-tab-active border border-blue-500/40 glow-border-blue text-white shadow-lg' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                  }`}
+                >
+                  <item.icon size={16} className={currentView === item.id ? 'glow-text-blue text-blue-400' : 'text-slate-400'} />
+                  <span className="font-medium text-left flex-1">{item.label}</span>
+                  {item.badge && (
+                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                      currentView === item.id ? 'bg-blue-500/30 text-blue-200' : 'bg-slate-800 text-slate-400'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.pulse && (
+                    <span className="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse"></span>
+                  )}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
 
-        <div className="p-6 border-t border-slate-800 text-xs text-slate-500 space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            FIPS 140-2 Active
+        {/* Footer HUD & Auth */}
+        <div className="p-4 border-t border-slate-800/80 bg-slate-950/60 text-xs text-slate-400 space-y-2.5 shrink-0">
+          <div className="flex items-center justify-between font-mono text-[10px]">
+            <span className="flex items-center gap-1.5 text-emerald-400 glow-text-green font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              FIPS 140-2 SEAL ACTIVE
+            </span>
+            <span className="text-slate-500">AES-256</span>
           </div>
-          
-          {!githubConnected ? (
-            <div 
-              onClick={handleGithubConnect}
-              className="flex items-center gap-2 text-slate-400 hover:text-white cursor-pointer transition-colors"
-            >
-              {connecting ? <Loader2 size={14} className="animate-spin" /> : <Github size={14} />} 
-              {connecting ? 'Connecting...' : 'Sign in with GitHub'}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-emerald-400 cursor-default">
-              <CheckCircle2 size={14} /> GitHub Connected
-            </div>
-          )}
 
-          {!walletConnected ? (
-            <div 
-              onClick={handleWalletConnect}
-              className="flex items-center gap-2 text-slate-400 hover:text-white cursor-pointer transition-colors"
-            >
-              {walletConnecting ? <Loader2 size={14} className="animate-spin" /> : <Wallet size={14} />} 
-              {walletConnecting ? 'Connecting...' : 'Connect Web3 Wallet'}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-blue-400 cursor-default">
-              <CheckCircle2 size={14} /> Wallet 0x7a...4eF
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            {!githubConnected ? (
+              <button
+                onClick={handleGithubConnect}
+                className="py-1.5 px-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-[11px] font-mono text-slate-300 flex items-center justify-center gap-1.5 transition-colors"
+              >
+                {connecting ? <Loader2 size={12} className="animate-spin" /> : <Github size={12} />}
+                GitHub
+              </button>
+            ) : (
+              <div className="py-1.5 px-2 bg-emerald-950/30 border border-emerald-800/40 rounded-lg text-[11px] font-mono text-emerald-400 flex items-center justify-center gap-1.5">
+                <CheckCircle2 size={12} /> Sync OK
+              </div>
+            )}
 
-          <div className="flex items-center gap-2 text-slate-400 hover:text-white cursor-pointer transition-colors">
-            <Settings size={14} /> Pipeline Config
+            {!walletConnected ? (
+              <button
+                onClick={handleWalletConnect}
+                className="py-1.5 px-2 bg-purple-950/30 hover:bg-purple-900/40 border border-purple-800/40 rounded-lg text-[11px] font-mono text-purple-300 flex items-center justify-center gap-1.5 transition-colors"
+              >
+                {walletConnecting ? <Loader2 size={12} className="animate-spin" /> : <Wallet size={12} />}
+                Connect
+              </button>
+            ) : (
+              <div className="py-1.5 px-2 bg-blue-950/30 border border-blue-800/40 rounded-lg text-[11px] font-mono text-blue-400 flex items-center justify-center gap-1.5">
+                <CheckCircle2 size={12} /> 0x7a...4eF
+              </div>
+            )}
           </div>
         </div>
       </aside>
 
-      {/* Mobile Nav Header */}
-      <header className="md:hidden border-b border-slate-800 bg-slate-900/40 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Hexagon size={24} className="text-blue-500" />
-          <h1 className="font-display font-bold text-md">ATOMIC SWARM</h1>
-        </div>
-        <button onClick={() => setIsMobileMenuOpen(true)}>
-          <Menu className="text-slate-400" />
-        </button>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        <header className="hidden md:flex h-16 border-b border-slate-800 bg-slate-900/20 items-center justify-between px-8 shrink-0">
-          <h2 className="font-display font-semibold text-lg text-slate-100 capitalize">
-            {navItems.find(i => i.id === currentView)?.label || currentView}
-          </h2>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4 text-xs font-mono text-slate-400 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-lg shadow-inner">
-              <div className="flex items-center gap-2">
-                <Database size={14} className="text-purple-400" />
-                <span>Network: <span className="text-slate-200">{activeNetwork}</span></span>
-              </div>
-              <div className="w-px h-3 bg-slate-700"></div>
-              <div className="flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+      {/* Main Content Viewport */}
+      <main className="flex-1 flex flex-col h-[100dvh] overflow-hidden bg-transparent">
+        
+        {/* Top Navbar */}
+        <header className="h-16 border-b border-slate-800/80 glass-panel flex items-center justify-between px-4 md:px-8 shrink-0 relative z-10">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300"
+            >
+              <Menu size={20} />
+            </button>
+            <div>
+              <h2 className="font-display font-bold text-base md:text-lg text-white capitalize flex items-center gap-2">
+                <span className="glow-text-blue">
+                  {activeItem?.label || currentView}
                 </span>
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 md:gap-5">
+            <div className="hidden sm:flex items-center gap-3 text-xs font-mono text-slate-300 bg-slate-950/60 border border-slate-800 px-3 py-1.5 rounded-xl shadow-inner">
+              <div className="flex items-center gap-1.5">
+                <Database size={13} className="text-purple-400 glow-text-purple" />
+                <span className="text-slate-400">Chain:</span>
+                <span className="text-white font-bold glow-text-blue">{activeNetwork}</span>
+              </div>
+              <div className="w-px h-3 bg-slate-800"></div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
                 <span className="text-emerald-400 font-bold">ONLINE</span>
               </div>
-              <div className="w-px h-3 bg-slate-700"></div>
+              <div className="w-px h-3 bg-slate-800"></div>
               <div className="flex items-center gap-1">
-                <Activity size={14} className={networkLatency < 50 ? "text-emerald-400" : networkLatency < 100 ? "text-amber-400" : "text-red-400"} />
-                <span className={networkLatency < 50 ? "text-emerald-400" : networkLatency < 100 ? "text-amber-400" : "text-red-400"}>{networkLatency}ms</span>
+                <Activity size={13} className={networkLatency < 50 ? "text-emerald-400" : "text-amber-400"} />
+                <span className="text-slate-300">{networkLatency}ms</span>
               </div>
             </div>
-            <div className="h-6 w-px bg-slate-700 mt-0.5"></div>
-            <button className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-3 py-1.5 rounded transition-colors flex gap-2 items-center">
-              Export Audit
+
+            <button 
+              onClick={() => setView('wallet')}
+              className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/40 rounded-xl text-xs font-mono font-medium flex items-center gap-1.5 transition-all glow-border-blue"
+            >
+              <Wallet size={13} />
+              <span className="hidden sm:inline">Web3 Vault</span>
             </button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-br from-[#020617] to-slate-950">
-          <div className="max-w-7xl mx-auto w-full">
+        {/* Scrollable Main Children Container - Optimized for Mobile */}
+        <div className="flex-1 overflow-y-auto p-3.5 md:p-8 bg-transparent ios-scroll-fix">
+          <div className="max-w-7xl mx-auto w-full pb-10">
             {children}
           </div>
         </div>
